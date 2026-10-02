@@ -239,6 +239,44 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .sumrow .v{text-align:center;font-weight:700}
 .sumrow.hd .v{font:400 22px/1 'Bebas Neue',sans-serif;letter-spacing:.05em}
 .sumrow .v small{display:block;font-weight:500;color:var(--mute);font-size:11.5px;line-height:1.2}
+.btn.mode{display:flex;flex-direction:column;align-items:center;gap:3px;padding:22px 16px}
+.btn.mode span{font-size:38px;line-height:1}
+.btn.mode small{font:400 22px/1 'Bebas Neue',sans-serif;letter-spacing:.1em}
+.btn.mode i{font:600 13px/1.3 'Barlow',sans-serif;font-style:normal;letter-spacing:0;opacity:.85;margin-top:5px}
+.modes{display:grid;gap:16px;margin:26px 0 8px}
+.note2{margin:0 2px 12px;color:var(--mute);font-size:14px;line-height:1.4}
+.note2 b{color:var(--ink)}
+.bcard{background:var(--panel);border:1px solid var(--c);border-radius:14px;padding:11px;margin-bottom:12px}
+.bt{display:flex;gap:10px;align-items:center}
+.bt b{font-size:26px;line-height:1}
+.bt .chips{justify-content:flex-start;margin-top:3px}
+.bstats{display:flex;gap:6px;margin-top:9px}
+.bstats span{flex:1;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 0;font:400 18px/1.2 'Bebas Neue',sans-serif;color:var(--mute);letter-spacing:.06em}
+.bidbar{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg) 24%);padding-top:16px;margin-top:auto;display:grid;gap:8px}
+.bidbar .note{font-size:14px;color:var(--ink)}
+.blist{display:grid;gap:8px;margin-top:16px}
+.brow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--pc);border-radius:12px;padding:10px 12px;opacity:.5;transition:.3s}
+.brow.on{opacity:1}
+.brow .bn{font-weight:700;color:var(--pc)}
+.brow .bv{font-size:30px;line-height:1;color:var(--gold2);grid-row:span 2;grid-column:2}
+.brow .btag{font-size:12px;color:var(--mute);min-height:14px}
+.brow.win{border-color:var(--gold);background:linear-gradient(90deg,rgba(231,181,60,.25),var(--panel));box-shadow:0 0 22px rgba(231,181,60,.4);animation:pop .5s}
+.brow.win .btag{color:var(--gold2);font-weight:700}
+.match{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.match .side{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.match .vsm{text-align:center;font:400 28px/1 'Bebas Neue',sans-serif;color:var(--gold);margin:7px 0}
+.mini{display:flex;gap:4px}
+.mini span{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);font-size:17px}
+.honor{display:grid;gap:8px;margin-bottom:12px}
+.honor .h{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.honor .h.g{border-color:var(--gold);background:linear-gradient(90deg,rgba(231,181,60,.22),var(--panel))}
+.honor .m{font-size:26px}
+.honor .n{font-weight:700}
+.honor .n small{display:block;font-weight:500;color:var(--mute);font-size:12px}
+.t5 .sumrow{grid-template-columns:1.3fr repeat(4,1fr);font-size:12.5px;gap:4px}
+.t5 .sumrow .v{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t5 .sumrow.hd .v{font-size:17px}
+.t5 .sumrow .v small{white-space:normal;font-size:10.5px}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50;display:none}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translate(-50%,20px);background:var(--gold);color:#1a1405;
   font-weight:700;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.3s;z-index:70}
@@ -248,7 +286,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 </head>
 <body>
 <div id="app">
-  <section id="scr-setup" class="screen active"></section>
+  <section id="scr-mode" class="screen active"></section>
+  <section id="scr-setup" class="screen"></section>
+  <section id="scr-setup4" class="screen"></section>
+  <section id="scr-t" class="screen"></section>
   <section id="scr-draft" class="screen"></section>
   <section id="scr-synergy" class="screen"></section>
   <section id="scr-pass" class="screen"></section>
@@ -466,6 +507,7 @@ function renderSetup(prev){
       <input id="n1" maxlength="14" value="${esc(n[1])}" autocomplete="off">
     </div>
     <button class="btn" data-act="start">Empezar draft</button>
+    <button class="btn ghost sm" data-act="toMode" style="margin-top:10px">Cambiar de modo</button>
     <ul class="rules">
       <li><b>Subasta:</b> las stats salen como ???. Abre la puja el que le toca, mínimo 1 moneda y sin pasar.</li>
       <li><b>Sinergias:</b> dos o más del mismo grupo dan bonus a todo el equipo.</li>
@@ -549,17 +591,18 @@ function renderDraft(){
 }
 
 /* ============================== SINERGIAS: construcción y pantalla ============================== */
-function buildTeam(p){
-  const team = S.teams[p], cnt = {};
+function makeFighters(team, p){
+  const cnt = {};
   team.forEach(m => cnt[m.tag] = (cnt[m.tag] || 0) + 1);
   const act = SYN.filter(s => s.test(cnt));
   const b = { hp:0, atk:0, def:0 };
   act.forEach(s => { for (const k in s.b) b[k] += s.b[k]; });
-  S.syn[p] = act;
-  S.fin[p] = team.map(m => ({ ...m, base:{ hp:m.hp, atk:m.atk, def:m.def }, bonus:b,
+  const fin = team.map(m => ({ ...m, base:{ hp:m.hp, atk:m.atk, def:m.def }, bonus:b,
     hp:m.hp + b.hp, maxhp:m.hp + b.hp, atk:m.atk + b.atk, def:m.def + b.def, dealt:0, kills:0, alive:true, owner:p,
     energy:0, crit:BASECRIT[m.ab.id] || .0625, critStack:0, st:{ poison:0, burn:0, stun:0, shock:0, confuse:0 }, x:{}, duelHp:0 }));
+  return { fin, syn:act };
 }
+function buildTeam(p){ const r = makeFighters(S.teams[p], p); S.syn[p] = r.syn; S.fin[p] = r.fin; }
 function goSynergy(){
   buildTeam(0); buildTeam(1); S.revealed = false;
   renderSyn(); show('synergy');
@@ -638,7 +681,7 @@ function moveFighter(i, d){
 const cur = p => S.fin[p][S.pos[p]];
 // [energía por ataque realizado, energía por golpe recibido]
 const RATE = { fast:[50, 10], normal:[25, 10], slow:[15, 8] };
-const nextAlive = p => { for (let i = S.pos[p] + 1; i < 4; i++) if (S.fin[p][i].alive) return i; return -1; };
+const nextAlive = p => { for (let i = S.pos[p] + 1; i < S.fin[p].length; i++) if (S.fin[p][i].alive) return i; return -1; };
 const say = t => { const e = $('#vsline'); if (e) e.textContent = t; };
 const gain = (F, v) => { if (F.ab.k !== 'P') F.energy = Math.min(100, F.energy + v); };
 
@@ -936,6 +979,7 @@ async function knockout(a, d){
 
 /* ============================== VICTORIA ============================== */
 function endGame(w){
+  if (S.onEnd) return S.onEnd(w);   // modo torneo: el duelo lo gestiona el torneo
   const l = 1 - w, all = [...S.fin[0], ...S.fin[1]];
   const mvp = all.slice().sort((x, y) => y.dealt - x.dealt || y.kills - x.kills)[0];
   const alive = S.fin[w].filter(m => m.alive).length;
@@ -993,7 +1037,7 @@ const ACT = {
   start(){
     let a = $('#n0').value.trim() || 'Jugador 1', b = $('#n1').value.trim() || 'Jugador 2';
     if (a.toLowerCase() === b.toLowerCase()) b += ' 2';
-    SFX.bid(); newGame([a, b]); startRound(); show('draft');
+    resetColors(); SFX.bid(); newGame([a, b]); startRound(); show('draft');
   },
   mute(){ muted = !muted; document.querySelectorAll('[data-act="mute"]').forEach(b => b.textContent = muted ? '🔇' : '🔊'); if (!muted) SFX.click(); },
   openMinus(){ S.openBid = Math.max(1, S.openBid - 1); SFX.click(); renderDraft(); },
@@ -1046,8 +1090,385 @@ document.addEventListener('click', e => {
   if (f) { if (!['mute', 'attack', 'auto', 'openMinus', 'openPlus', 'up', 'down', 'passOk', 'start', 'again'].includes(b.dataset.act)) SFX.click(); f(b); }
 });
 
+/* ============================== MODO 4 JUGADORES (LIGA & TORNEO) ============================== */
+const PC4 = ['#36c8ff', '#ff3b52', '#e7b53c', '#b07cff'];
+const PC4A = ['rgba(54,200,255,.35)', 'rgba(255,59,82,.35)', 'rgba(231,181,60,.35)', 'rgba(176,124,255,.35)'];
+const PCOL_DEF = ['#36c8ff', '#ff3b52'], PCOLA_DEF = ['rgba(54,200,255,.35)', 'rgba(255,59,82,.35)'];
+function resetColors(){ PCOL[0] = PCOL_DEF[0]; PCOL[1] = PCOL_DEF[1]; PCOLA[0] = PCOLA_DEF[0]; PCOLA[1] = PCOLA_DEF[1]; }
+let T = null;
+const tn = i => `<b style="color:${PC4[i]}">${esc(T.names[i])}</b>`;
+const sumA = a => a.reduce((x, y) => x + y, 0);
+function tshow(html){
+  const el = $('#scr-t'); el.innerHTML = html; el.classList.remove('active'); void el.offsetWidth; show('t');
+}
+function passScreen(name, color, msg, next, btn){
+  T.passNext = next;
+  $('#scr-pass').innerHTML = `<div class="passwrap"><div class="phone">📱</div><p>${msg}</p>
+    <div class="big disp" style="color:${color}">${esc(name)}</div><button class="btn" data-act="tPassOk">${esc(btn)}</button></div>`;
+  show('pass');
+}
+function doShare(t){
+  return (async () => {
+    try {
+      if (navigator.share) { await navigator.share({ text: t }); return; }
+      await navigator.clipboard.writeText(t); toast('Resumen copiado');
+    } catch (e) {
+      try { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('Resumen copiado'); }
+      catch (e2) { toast('No se pudo copiar'); }
+    }
+  })();
+}
+
+/* ---------- Selección de modo y registro ---------- */
+function renderMode(){
+  $('#scr-mode').innerHTML = `
+    <div class="hero">
+      <div class="bigcoin disp"><span>20</span></div>
+      <h1 class="title disp">Draft <em>20</em></h1>
+      <p class="sub">Elige cómo quieres jugar.</p>
+    </div>
+    <div class="modes">
+      <button class="btn mode" data-act="mode2"><span class="disp">2 JUGADORES</span><small>(DRAFT CLÁSICO)</small><i>Subasta alterna de 20 monedas y combate final 4v4.</i></button>
+      <button class="btn mode red" data-act="mode4"><span class="disp">4 JUGADORES</span><small>(LIGA &amp; TORNEO)</small><i>Pujas secretas, duelos por fases y torneo final.</i></button>
+    </div>`;
+}
+function renderSetup4(prev){
+  const n = prev || ['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4'];
+  $('#scr-setup4').innerHTML = `
+    <div class="head"><h2 class="disp">Liga &amp; torneo</h2>${muteBtn()}</div>
+    <div class="panel" style="margin-top:6px">
+      ${[0, 1, 2, 3].map(i => `<label for="t${i}">Jugador ${i + 1}</label><input id="t${i}" style="border-left:4px solid ${PC4[i]}" maxlength="14" value="${esc(n[i])}" autocomplete="off">`).join('')}
+    </div>
+    <button class="btn" data-act="start4">Empezar torneo</button>
+    <button class="btn ghost sm" data-act="toMode" style="margin-top:10px">Cambiar de modo</button>
+    <ul class="rules">
+      <li><b>Drafts 1 y 2:</b> pujas secretas por 4 personajes; cada uno se lleva exactamente 1. Luego duelos 1v1 y 2v2 con monedas extra.</li>
+      <li><b>Drafts 3 y 4:</b> seguidos, sin combates. Al final cada uno tiene 4 luchadores.</li>
+      <li><b>Torneo final:</b> dos semifinales 4v4 y la Gran Final.</li>
+    </ul>`;
+}
+function newTournament(names){
+  T = { names, coins:[20, 20, 20, 20], spent:[0, 0, 0, 0], teams:[[], [], [], []], deck:shuffle(CHARS), deckPos:0, draft:0,
+        order:[], cards:[], bids:[], bidIdx:0, cur:[], curPid:0, res:[], ri:0, rows:[], rvBusy:false, rvDone:false,
+        phase:'', pairs:[], di:0, prevKey:null, log:[], perf:{}, fx:[], lp:0, passNext:null, dfx:[], duelPids:[0, 1],
+        stats:[0, 1, 2, 3].map(() => ({ dmg:0, crits:0, kills:0, wins:0 })) };
+}
+
+/* ---------- Drafts de pujas secretas ---------- */
+function startDraft(){
+  T.draft++;
+  T.cards = T.deck.slice(T.deckPos, T.deckPos + 4); T.deckPos += 4;
+  T.order = shuffle([0, 1, 2, 3]); T.bids = [[], [], [], []]; T.bidIdx = 0;
+  tshow(`
+    <div class="head"><h2 class="disp">Draft ${T.draft} de 4</h2>${muteBtn()}</div>
+    <p class="note2">Puja secreta: cada jugador ve los <b>mismos 4 personajes</b> y fija su <b>puja máxima</b> por cada uno (mínimo 1). Las pujas no se suman. Gana la puja más alta de toda la mesa; ese jugador sale de la ronda y los demás siguen disputando los personajes libres con sus pujas intactas, hasta que cada uno se lleve <b>exactamente 1</b> y pague lo que pujó por él.</p>
+    <div class="sumtab">${[0, 1, 2, 3].map(i => `<div class="sumrow" style="grid-template-columns:1fr auto"><div>${tn(i)}</div><div class="v">${T.coins[i]} 🪙</div></div>`).join('')}</div>
+    <p class="note2">Orden de turno (aleatorio, decide los empates): ${T.order.map((p, i) => `${i + 1}. ${tn(p)}`).join(' · ')}</p>
+    ${T.draft === 3 ? '<p class="note2">Ojo: en el Draft 3 tu puja máxima baja 1 🪙, para que te quede al menos 1 🪙 en el Draft 4.</p>' : ''}
+    <div class="actions"><button class="btn" data-act="tStartBids">Empezar pujas</button></div>`);
+}
+function nextBidder(){
+  if (T.bidIdx >= 4) return passScreen('La mesa', '#e7b53c', 'Dejad el móvil sobre la mesa: toca la revelación.', startReveal, 'Revelar resultados');
+  const pid = T.order[T.bidIdx];
+  passScreen(T.names[pid], PC4[pid], `Puja secreta ${T.bidIdx + 1} de 4. Pasa el móvil a`, () => { T.cur = [1, 1, 1, 1]; T.curPid = pid; renderBid(pid); }, `Soy ${T.names[pid]}`);
+}
+const bidMax = pid => Math.max(1, T.coins[pid] - (T.draft === 3 ? 1 : 0));
+function renderBid(pid){
+  tshow(`
+    <div class="head"><h2 class="disp" style="color:${PC4[pid]}">Puja de ${esc(T.names[pid])}</h2>${muteBtn()}</div>
+    <p class="note2">Draft ${T.draft}. Tienes <b>${T.coins[pid]} 🪙</b>. Pon el <b>máximo</b> que pagarías por cada personaje (mínimo 1). Las pujas no se suman: solo pagas la del personaje que ganes.</p>
+    ${T.cards.map((c, i) => `<div class="bcard" style="--c:${tc(c.tag)};--ca:${tc(c.tag)}55">
+      <div class="bt"><div class="ring xs"><span>${c.icono}</span></div>
+        <div><b class="disp">${esc(c.nombre)}</b><div class="chips"><span class="chip ${c.rol === 'Hero' ? 'hero' : 'villain'}">${c.rol === 'Hero' ? 'Héroe' : 'Villano'}</span><span class="chip" style="color:${tc(c.tag)}">${c.tag}</span></div></div></div>
+      <div class="bstats"><span>HP ???</span><span>ATK ???</span><span>DEF ???</span></div>
+      <div class="abox"><span class="abtype">${KINDLBL[c.ab.k]}</span><b class="disp">${esc(c.ab.n)}</b><p>${esc(c.ab.d)}</p></div>
+      <div class="stepper" style="margin-top:10px"><button class="sbtn" id="bm${i}" data-act="bidMinus" data-i="${i}">−</button><div class="sval disp" id="bv${i}">1 🪙</div><button class="sbtn" id="bp${i}" data-act="bidPlus" data-i="${i}">+</button></div>
+    </div>`).join('')}
+    <div class="bidbar"><div class="note" id="bdSum"></div><button class="btn" data-act="bidOk">Confirmar pujas</button></div>`);
+  paintBid(pid);
+}
+function paintBid(pid){
+  const mx = bidMax(pid);
+  T.cur.forEach((b, i) => { $('#bv' + i).textContent = b + ' 🪙'; $('#bm' + i).disabled = b <= 1; $('#bp' + i).disabled = b + 1 > mx; });
+  $('#bdSum').innerHTML = `Puja máxima por personaje: <b>${mx}</b> 🪙 · las pujas no se suman`;
+}
+// Resolución por puja récord: en cada ronda gana la puja más alta de todas las que siguen vivas (jugadores y personajes libres).
+// El ganador paga su puja y sale; los demás conservan sus pujas intactas sobre los personajes que quedan.
+// Empate: quien pujó antes en el orden de turno.
+function resolveBids(){
+  const free = new Set([0, 1, 2, 3]); let act = T.order.slice();
+  const res = [], steps = [];
+  while (act.length) {
+    let best = null;
+    for (const pid of act) for (const ci of free) {
+      const b = T.bids[pid][ci], oi = T.order.indexOf(pid);
+      if (!best || b > best.b || (b === best.b && (oi < best.oi || (oi === best.oi && ci < best.ci)))) best = { pid, ci, b, oi };
+    }
+    const rows = act.map(pid => ({ pid, b:T.bids[pid][best.ci] })).sort((x, y) => y.b - x.b || T.order.indexOf(x.pid) - T.order.indexOf(y.pid));
+    steps.push({ ci:best.ci, pid:best.pid, price:best.b, rows });
+    res[best.ci] = { pid:best.pid, price:best.b };
+    act = act.filter(q => q !== best.pid); free.delete(best.ci);
+  }
+  T.steps = steps; return res;
+}
+function startReveal(){ T.res = resolveBids(); T.ri = 0; renderReveal(); }
+function renderReveal(){
+  const st = T.steps[T.ri], c = T.cards[st.ci];
+  T.rows = st.rows; T.rvBusy = false; T.rvDone = false;
+  const out = T.steps.slice(0, T.ri).map(x => x.pid);
+  tshow(`
+    <div class="head"><h2 class="disp">Revelación ${T.ri + 1} de 4</h2>${muteBtn()}</div>
+    <p class="note2">${T.ri === 0 ? 'Se evalúa primero la <b>puja más alta de toda la mesa</b>.' : `Ya tienen personaje: ${out.map(i => tn(i)).join(', ')}. Los demás siguen con sus pujas intactas.`}</p>
+    <div class="acard enter" style="--c:${tc(c.tag)};--ca:${tc(c.tag)}55">
+      <div class="ring"><span>${c.icono}</span></div>
+      <h2 class="disp">${esc(c.nombre)}</h2>
+      <div class="chips"><span class="chip ${c.rol === 'Hero' ? 'hero' : 'villain'}">${c.rol === 'Hero' ? 'Héroe' : 'Villano'}</span><span class="chip" style="color:${tc(c.tag)}">${c.tag}</span></div>
+      <div class="abox"><span class="abtype">${KINDLBL[c.ab.k]}</span><b class="disp">${esc(c.ab.n)}</b><p>${esc(c.ab.d)}</p></div>
+    </div>
+    <div class="blist">${T.rows.map((r, i) => `<div class="brow" id="br${i}" style="--pc:${PC4[r.pid]}"><span class="bn">${esc(T.names[r.pid])}</span><span class="bv disp" id="brv${i}">???</span><span class="btag" id="brt${i}"></span></div>`).join('')}</div>
+    <div class="actions"><button class="btn" id="rvBtn" data-act="rvReveal">Revelar pujas</button></div>`);
+}
+async function rvReveal(){
+  if (T.rvBusy || T.rvDone) return; T.rvBusy = true; $('#rvBtn').disabled = true;
+  const st = T.steps[T.ri], rows = T.rows;
+  for (let i = rows.length - 1; i >= 0; i--) {
+    $('#brv' + i).textContent = rows[i].b + ' 🪙'; $('#br' + i).classList.add('on'); SFX.flip(); vib(15); await sleep(650);
+  }
+  await sleep(300);
+  rows.forEach((r, i) => {
+    const t = $('#brt' + i);
+    if (r.pid === st.pid) { $('#br' + i).classList.add('win'); t.textContent = T.ri === 0 ? '¡PUJA RÉCORD! SE LO LLEVA' : '¡SE LO LLEVA!'; }
+    else t.textContent = 'sigue en la subasta';
+  });
+  SFX.synergy(); flash(); vib([40, 30, 80]);
+  T.rvDone = true; T.rvBusy = false;
+  const btn = $('#rvBtn'); btn.disabled = false; btn.dataset.act = 'rvNext'; btn.textContent = T.ri < 3 ? 'Siguiente ronda' : 'Continuar';
+}
+function finishDraft(){
+  T.res.forEach((r, ci) => { T.coins[r.pid] -= r.price; T.spent[r.pid] += r.price; T.teams[r.pid].push(T.cards[ci]); });
+  const rows = [0, 1, 2, 3].map(pid => {
+    const ci = T.res.findIndex(r => r.pid === pid), c = T.cards[ci];
+    return `<div class="lrow" style="--c:${tc(c.tag)}"><div class="ring xs" style="--ca:${tc(c.tag)}55"><span>${c.icono}</span></div>
+      <div class="lmeta"><b class="disp">${esc(c.nombre)}</b><span style="color:${PC4[pid]}">${esc(T.names[pid])}</span>
+      <span style="display:block">Pagó ${T.res[ci].price} 🪙 · le quedan ${T.coins[pid]} 🪙</span></div></div>`;
+  }).join('');
+  const lbl = ['', 'Ir a los duelos 1v1', 'Ir a los duelos 2v2', 'Siguiente: Draft 4', 'Sinergias y torneo final'][T.draft];
+  tshow(`<div class="head"><h2 class="disp">Draft ${T.draft} completado</h2>${muteBtn()}</div>${rows}
+    <div class="actions"><button class="btn" data-act="tAfterDraft">${lbl}</button></div>`);
+}
+
+/* ---------- Emparejamientos y duelos ---------- */
+function pickPairs(){
+  const opts = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];
+  const key = o => o.map(x => x.slice().sort().join('')).sort().join('|');
+  let pool = opts.filter(o => key(o) !== T.prevKey); if (!pool.length) pool = opts;
+  const o = pool[Math.random() * pool.length | 0]; T.prevKey = key(o);
+  return shuffle(o.map(pr => shuffle(pr)));
+}
+const phaseTitle = () => ({ 1:'Fase 1 · Duelos 1v1', 2:'Fase 2 · Duelos 2v2', semi:'Semifinales 4v4', final:'Gran Final 4v4' })[T.phase];
+const phaseSize = () => ({ 1:1, 2:2, semi:4, final:4 })[T.phase];
+function startPhase(ph){ T.phase = ph; T.pairs = pickPairs(); T.di = 0; showPairings(); }
+function showPairings(){
+  const hint = ({
+    1:'Cada uno pelea con el único personaje que ha conseguido. Ganadores +10 🪙, perdedores +5 🪙.',
+    2:'Survival con 2 personajes: el que gana un duelo conserva su vida para el siguiente. Ganadores +20 🪙, perdedores +10 🪙. Antes de cada duelo, cada jugador ordena sus luchadores en secreto.',
+    semi:'Survival 4v4. Antes de cada duelo, cada jugador ordena sus luchadores en secreto. Los dos ganadores pasan a la Gran Final.',
+    final:'Los finalistas vuelven a ordenar a sus luchadores en secreto. El ganador se proclama campeón del torneo.' })[T.phase];
+  const side = pid => `<div class="side">${tn(pid)}<div class="mini">${T.teams[pid].slice(0, phaseSize()).map(c => `<span>${c.icono}</span>`).join('')}</div></div>`;
+  tshow(`<div class="head"><h2 class="disp">${phaseTitle()}</h2>${muteBtn()}</div>
+    <p class="note2">${hint}</p>
+    ${T.pairs.map((pr, i) => `<div class="match">${side(pr[0])}<div class="vsm">VS</div>${side(pr[1])}</div>`).join('')}
+    <div class="actions"><button class="btn" data-act="tNextDuel">${T.pairs.length > 1 ? 'Primer duelo' : 'Ir al duelo'}</button></div>`);
+}
+function runDuel(){
+  const [a, b] = T.pairs[T.di], size = phaseSize();
+  const fa = makeFighters(T.teams[a].slice(0, size), 0), fb = makeFighters(T.teams[b].slice(0, size), 1);
+  T.dfx = [fa, fb]; T.duelPids = [a, b];
+  PCOL[0] = PC4[a]; PCOL[1] = PC4[b]; PCOLA[0] = PC4A[a]; PCOLA[1] = PC4A[b];
+  S = { names:[T.names[a], T.names[b]], fin:[fa.fin, fb.fin], syn:[fa.syn, fb.syn], pos:[0, 0], atk:0, auto:false, busy:false,
+        ended:false, dmgTotal:[0, 0], crits:[0, 0], onEnd:w => duelEnd(a, b, w) };
+  const block = (pid, r) => `<div class="tblock" style="--pc:${PC4[pid]}"><h3 class="disp">${esc(T.names[pid])}</h3>
+    ${r.fin.map((m, i) => `<div class="lrow" style="--c:${tc(m.tag)}">${r.fin.length > 1 ? `<div class="pos disp">${i + 1}</div>` : ''}<div class="ring xs" style="--ca:${tc(m.tag)}55"><span>${m.icono}</span></div>
+      <div class="lmeta"><b class="disp">${esc(m.nombre)}</b><span>HP ${m.hp} · ATK ${m.atk} · DEF ${m.def}</span>
+      <span style="display:block;color:var(--gold2)">${esc(m.ab.n)} · ${KINDLBL[m.ab.k]}</span></div></div>`).join('')}
+    ${r.syn.map(s => `<div class="syn"><div class="si">${s.ico}</div><div><b>${s.name}</b><span>${bonusTxt(s.b)} a todos</span></div></div>`).join('')}</div>`;
+  tshow(`<div class="head"><h2 class="disp">${phaseTitle()}</h2>${muteBtn()}</div>
+    <p class="note2">Duelo ${T.di + 1} de ${T.pairs.length}. Aquí tenéis las stats reales${(fa.syn.length || fb.syn.length) ? ' con sus sinergias' : ''}.</p>
+    ${block(a, fa)}${block(b, fb)}
+    <div class="actions"><button class="btn red" data-act="tFight">¡A la arena!</button></div>`);
+  SFX.bid();
+}
+function duelEnd(a, b, w){
+  const pids = [a, b], win = pids[w], lose = pids[1 - w];
+  [0, 1].forEach(sd => {
+    const pid = pids[sd], st = T.stats[pid];
+    st.dmg += S.dmgTotal[sd]; st.crits += S.crits[sd];
+    S.fin[sd].forEach(f => {
+      st.kills += f.kills;
+      const k = pid + ':' + f.id, e = T.perf[k] || (T.perf[k] = { pid, nombre:f.nombre, icono:f.icono, tag:f.tag, dealt:0, kills:0 });
+      e.dealt += f.dealt; e.kills += f.kills;
+    });
+  });
+  T.stats[win].wins++;
+  const surv = S.fin[w].filter(f => f.alive);
+  const bonus = T.phase === 1 ? [10, 5] : T.phase === 2 ? [20, 10] : null;
+  if (bonus) { T.coins[win] += bonus[0]; T.coins[lose] += bonus[1]; }
+  T.log.push({ phase:T.phase, a, b, win, lose });
+  SFX.win(); vib([60, 40, 60]);
+  tshow(`<div class="crown">⚔️</div>
+    <div class="wname disp" style="color:${PC4[win]};font-size:52px">${esc(T.names[win])}</div>
+    <div class="wsub">gana el duelo a ${esc(T.names[lose])}</div>
+    <div class="tblock" style="--pc:${PC4[win]}"><h3 class="disp">Supervivientes</h3>
+      ${surv.map(f => `<div class="lrow" style="--c:${tc(f.tag)}"><div class="ring xs" style="--ca:${tc(f.tag)}55"><span>${f.icono}</span></div>
+        <div class="lmeta"><b class="disp">${esc(f.nombre)}</b><span>${Math.round(f.hp)} / ${Math.round(f.maxhp)} HP · ${f.kills} K.O.</span></div></div>`).join('')}</div>
+    ${bonus ? `<div class="sumtab"><div class="sumrow" style="grid-template-columns:1fr auto"><div>${tn(win)} (ganador)</div><div class="v">+${bonus[0]} 🪙</div></div>
+      <div class="sumrow" style="grid-template-columns:1fr auto"><div>${tn(lose)} (perdedor)</div><div class="v">+${bonus[1]} 🪙</div></div></div>` : ''}
+    <div class="actions"><button class="btn" data-act="tAfterDuel">Continuar</button></div>`);
+}
+function afterDuel(){
+  T.di++;
+  if (T.di < T.pairs.length) return duelLineups();
+  if (T.phase === 1 || T.phase === 2) return startDraft();
+  if (T.phase === 'semi') {
+    const sm = T.log.filter(l => l.phase === 'semi');
+    T.phase = 'final'; T.pairs = [[sm[0].win, sm[1].win]]; T.di = 0; return showPairings();
+  }
+  renderChampion();
+}
+
+/* ---------- Fase final: sinergias, alineación y torneo ---------- */
+function revCard4(m, p, i){
+  return `<div class="mcard" id="tm${p}${i}" style="--c:${tc(m.tag)};--ca:${tc(m.tag)}55">
+    <div class="ring sm"><span>${m.icono}</span></div><div class="mname disp">${esc(m.nombre)}</div>
+    <span class="chip" style="color:${tc(m.tag)}">${m.tag}</span>
+    <div class="st3">${['hp', 'atk', 'def'].map(k => `<div class="st"><i>${k.toUpperCase()}</i><b data-k="${k}">???</b></div>`).join('')}</div></div>`;
+}
+function startFinal(){
+  T.phase = 'syn'; T.revealed = false;
+  T.fx = [0, 1, 2, 3].map(pid => makeFighters(T.teams[pid], 0));
+  tshow(`<div class="head"><h2 class="disp">Sinergias del torneo</h2>${muteBtn()}</div>
+    ${[0, 1, 2, 3].map(pid => `<div class="tblock" style="--pc:${PC4[pid]}"><h3 class="disp">${esc(T.names[pid])}</h3>
+      <div class="mgrid">${T.fx[pid].fin.map((m, i) => revCard4(m, pid, i)).join('')}</div><div class="synlist" id="tsyn${pid}"></div></div>`).join('')}
+    <div class="actions" style="padding-bottom:4px"><button class="btn" id="tsBtn" data-act="tRevealSyn">Revelar stats y sinergias</button></div>`);
+}
+async function revealSyn4(){
+  if (T.revealed) return; T.revealed = true;
+  const btn = $('#tsBtn'); btn.disabled = true;
+  for (let p = 0; p < 4; p++) for (let i = 0; i < T.fx[p].fin.length; i++) {
+    const m = T.fx[p].fin[i], card = $('#tm' + p + i);
+    card.classList.add('rev'); SFX.flip(); vib(12);
+    card.querySelectorAll('b[data-k]').forEach(bb => { const k = bb.dataset.k, bo = m.bonus[k]; bb.innerHTML = m[k] + (bo ? `<sup>+${bo}</sup>` : ''); });
+    await sleep(170);
+  }
+  await sleep(250);
+  for (let p = 0; p < 4; p++) {
+    const box = $('#tsyn' + p);
+    if (!T.fx[p].syn.length) { box.innerHTML = '<div class="nosyn">Sin sinergias activas.</div>'; continue; }
+    for (const sy of T.fx[p].syn) {
+      box.insertAdjacentHTML('beforeend', `<div class="syn"><div class="si">${sy.ico}</div><div><b>${sy.name}</b><span>${bonusTxt(sy.b)} a todos</span></div></div>`);
+      SFX.synergy(); flash(); vib([30, 30, 60]); await sleep(600);
+    }
+  }
+  btn.textContent = 'Ir a las semifinales'; btn.dataset.act = 'tToSemis'; btn.disabled = false;
+}
+// Antes de cada duelo con 2 o más personajes por jugador: orden secreto de cada duelista. Con 1 personaje se salta.
+function duelLineups(){
+  if (phaseSize() < 2) return runDuel();
+  T.lq = T.pairs[T.di].slice(); T.lqi = 0; lineupNext();
+}
+function lineupNext(){
+  if (T.lqi >= T.lq.length) return runDuel();
+  const pid = T.lq[T.lqi]; T.lpid = pid;
+  passScreen(T.names[pid], PC4[pid], `Ordena tu equipo en secreto (${phaseTitle()}). Pasa el móvil a`, () => renderLineup4(pid, true), `Soy ${T.names[pid]}`);
+}
+function renderLineup4(pid, anim){
+  const fin = makeFighters(T.teams[pid], 0).fin, opp = T.lq.find(q => q !== pid), n = fin.length;
+  const html = `<div class="head"><h2 class="disp" style="color:${PC4[pid]}">Alineación de ${esc(T.names[pid])}</h2>${muteBtn()}</div>
+    <p class="note2">Te enfrentas a ${tn(opp)}. La posición 1 sale al ring primero; el ganador de cada duelo sigue herido, así que decide quién abre y quién cierra.</p>
+    ${fin.map((m, i) => `<div class="lrow" style="--c:${tc(m.tag)}"><div class="pos disp">${i + 1}</div>
+      <div class="ring xs" style="--ca:${tc(m.tag)}55"><span>${m.icono}</span></div>
+      <div class="lmeta"><b class="disp">${esc(m.nombre)}</b><span>HP ${m.hp} · ATK ${m.atk} · DEF ${m.def}</span><span style="display:block;color:var(--gold2)">${esc(m.ab.n)} · ${KINDLBL[m.ab.k]}</span></div>
+      <div class="mv"><button data-act="tUp" data-i="${i}" ${i === 0 ? 'disabled' : ''}>▲</button><button data-act="tDown" data-i="${i}" ${i === n - 1 ? 'disabled' : ''}>▼</button></div></div>`).join('')}
+    <div class="actions"><button class="btn" data-act="tLineupOk">Confirmar orden</button></div>`;
+  if (anim) tshow(html); else $('#scr-t').innerHTML = html;
+}
+function moveT(i, d){
+  const a = T.teams[T.lpid], j = i + d; if (j < 0 || j >= a.length) return;
+  [a[i], a[j]] = [a[j], a[i]]; SFX.click(); renderLineup4(T.lpid, false);
+}
+
+/* ---------- Campeón ---------- */
+function champText(){
+  const f = T.log.find(l => l.phase === 'final'), m = T.mvp;
+  return `🏆 Draft 20 · Liga & Torneo\nCampeón: ${T.names[f.win]}\nGran final: ${T.names[f.win]} vence a ${T.names[f.lose]}\n` +
+    `MVP: ${m.icono} ${m.nombre} de ${T.names[m.pid]} (${m.dealt} de daño, ${m.kills} K.O.)\n` +
+    [0, 1, 2, 3].map(i => `${T.names[i]}: ${T.spent[i]} 🪙 gastadas, ${T.stats[i].dmg} de daño, ${T.stats[i].crits} críticos`).join('\n');
+}
+function renderChampion(){
+  const f = T.log.find(l => l.phase === 'final'), semis = T.log.filter(l => l.phase === 'semi');
+  T.mvp = Object.values(T.perf).sort((x, y) => y.dealt - x.dealt || y.kills - x.kills)[0];
+  const m = T.mvp;
+  const hon = (ic, pid, txt, g) => `<div class="h ${g ? 'g' : ''}"><div class="m">${ic}</div><div class="n" style="color:${PC4[pid]}">${esc(T.names[pid])}<small>${txt}</small></div></div>`;
+  tshow(`<div class="crown">🏆</div>
+    <div class="wname disp" style="color:${PC4[f.win]}">${esc(T.names[f.win])}</div>
+    <div class="wsub">Campeón del torneo</div>
+    <div class="honor">
+      ${hon('🥇', f.win, 'Campeón', true)}${hon('🥈', f.lose, 'Finalista')}
+      ${semis.map(l => hon('🥉', l.lose, 'Semifinalista')).join('')}
+    </div>
+    <p class="note2">${semis.map((l, i) => `Semifinal ${i + 1}: ${tn(l.a)} vs ${tn(l.b)} → <b>${esc(T.names[l.win])}</b>`).join('<br>')}<br>Gran final: ${tn(f.a)} vs ${tn(f.b)} → <b>${esc(T.names[f.win])}</b></p>
+    <div class="mvp" style="--c:${tc(m.tag)};--ca:${tc(m.tag)}55"><div class="ring"><span>${m.icono}</span></div>
+      <div><small>MVP global del torneo</small><b class="disp">${esc(m.nombre)}</b><span>${m.dealt} de daño · ${m.kills} K.O. · de ${esc(T.names[m.pid])}</span></div></div>
+    <div class="sumtab t5">
+      <div class="sumrow hd"><div></div>${[0, 1, 2, 3].map(i => `<div class="v" style="color:${PC4[i]}">${esc(T.names[i])}</div>`).join('')}</div>
+      <div class="sumrow"><div class="k">Monedas gastadas</div>${T.spent.map(v => `<div class="v">${v}</div>`).join('')}</div>
+      <div class="sumrow"><div class="k">Daño total</div>${T.stats.map(v => `<div class="v">${v.dmg}</div>`).join('')}</div>
+      <div class="sumrow"><div class="k">Críticos</div>${T.stats.map(v => `<div class="v">${v.crits}</div>`).join('')}</div>
+      <div class="sumrow"><div class="k">K.O.</div>${T.stats.map(v => `<div class="v">${v.kills}</div>`).join('')}</div>
+      <div class="sumrow"><div class="k">Victorias</div>${T.stats.map(v => `<div class="v">${v.wins}</div>`).join('')}</div>
+      <div class="sumrow"><div class="k">Sinergias</div>${T.fx.map(x => `<div class="v"><small>${x.syn.length ? x.syn.map(s => s.name).join(', ') : '—'}</small></div>`).join('')}</div>
+    </div>
+    <div class="actions" style="padding-bottom:4px"><button class="btn" data-act="tShare">Compartir resumen</button>
+      <button class="btn ghost" data-act="tAgain">Nuevo torneo</button>
+      <button class="btn ghost sm" data-act="toMode">Cambiar de modo</button></div>`);
+  SFX.win(); vib([80, 50, 80, 50, 160]); confetti();
+}
+
+Object.assign(ACT, {
+  mode2(){ SFX.click(); renderSetup(); show('setup'); },
+  mode4(){ SFX.click(); renderSetup4(); show('setup4'); },
+  toMode(){ SFX.click(); renderMode(); show('mode'); },
+  start4(){
+    const names = [0, 1, 2, 3].map(i => ($('#t' + i).value.trim() || 'Jugador ' + (i + 1)));
+    const seen = new Set(); names.forEach((n, i) => { let k = n; while (seen.has(k.toLowerCase())) k = n + ' ' + (i + 1); seen.add(k.toLowerCase()); names[i] = k; });
+    SFX.bid(); newTournament(names); startDraft();
+  },
+  tAgain(){ SFX.click(); renderSetup4(T ? T.names : null); show('setup4'); },
+  tPassOk(){ SFX.click(); if (T && T.passNext) T.passNext(); },
+  tStartBids(){ SFX.click(); nextBidder(); },
+  bidPlus(b){ const i = +b.dataset.i, pid = T.curPid; if (T.cur[i] + 1 > bidMax(pid)) return; T.cur[i]++; SFX.click(); paintBid(pid); },
+  bidMinus(b){ const i = +b.dataset.i; if (T.cur[i] <= 1) return; T.cur[i]--; SFX.click(); paintBid(T.curPid); },
+  bidOk(){ T.bids[T.curPid] = T.cur.slice(); T.bidIdx++; SFX.bid(); nextBidder(); },
+  rvReveal(){ rvReveal(); },
+  rvNext(){ SFX.click(); if (T.ri < 3) { T.ri++; renderReveal(); } else finishDraft(); },
+  tAfterDraft(){
+    SFX.click();
+    if (T.draft === 1) startPhase(1); else if (T.draft === 2) startPhase(2);
+    else if (T.draft === 3) startDraft(); else startFinal();
+  },
+  tNextDuel(){ SFX.click(); duelLineups(); },
+  tFight(){ SFX.click(); startBattle(); },
+  tAfterDuel(){ SFX.click(); afterDuel(); },
+  tRevealSyn(){ revealSyn4(); },
+  tToSemis(){ SFX.click(); startPhase('semi'); },
+  tUp(b){ moveT(+b.dataset.i, -1); },
+  tDown(b){ moveT(+b.dataset.i, 1); },
+  tLineupOk(){ SFX.bid(); T.lqi++; lineupNext(); },
+  tShare(){ doShare(champText()); }
+});
+
 /* ============================== ARRANQUE ============================== */
-renderSetup();
+renderMode();
 </script>
 </body>
 </html>
