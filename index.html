@@ -277,6 +277,24 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .t5 .sumrow .v{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .t5 .sumrow.hd .v{font-size:17px}
 .t5 .sumrow .v small{white-space:normal;font-size:10.5px}
+.hero.small .bigcoin{width:96px;height:96px;font-size:52px;box-shadow:0 0 0 4px #2a1d02,0 0 0 6px var(--gold),0 0 40px rgba(231,181,60,.5)}
+.hero.small .title{font-size:52px;margin:12px 0 0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 0}
+.tab{appearance:none;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--mute);font:400 19px/1.15 'Bebas Neue','Impact',sans-serif;letter-spacing:.06em;padding:11px 6px;border-radius:12px;transition:.2s}
+.tab.on{color:#1a1405;background:linear-gradient(180deg,var(--gold2),var(--gold));border-color:var(--gold);box-shadow:0 0 18px rgba(231,181,60,.35)}
+.btn.mode.neon{background:linear-gradient(180deg,#8be3ff,#36c8ff);color:#04202b}
+.btn.mode.violet{background:linear-gradient(180deg,#d2b8ff,#b07cff);color:#1d0a3a}
+.bcard.pk{cursor:pointer;transition:box-shadow .2s,background .2s}
+.bcard.sel{box-shadow:0 0 0 2px var(--gold),0 0 26px rgba(231,181,60,.5);background:linear-gradient(180deg,rgba(231,181,60,.16),var(--panel))}
+.synline{margin-top:9px;font-size:13px;line-height:1.35;color:var(--mute);background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:7px 9px}
+.synline b{color:var(--ink)}
+.synline.hot{border-color:var(--gold);border-style:solid;color:var(--gold2)}
+.synline.hot b{color:var(--gold2)}
+.shopgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+.buy{appearance:none;cursor:pointer;border:1px solid var(--gold);background:var(--panel2);color:var(--ink);border-radius:10px;padding:8px 2px;font:400 21px/1 'Bebas Neue',sans-serif;letter-spacing:.05em}
+.buy small{display:block;font:600 12px 'Barlow',sans-serif;color:var(--gold2);margin-top:3px;letter-spacing:0}
+.buy:active{transform:scale(.96)}
+.buy:disabled{opacity:.3;cursor:not-allowed}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50;display:none}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translate(-50%,20px);background:var(--gold);color:#1a1405;
   font-weight:700;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.3s;z-index:70}
@@ -597,9 +615,13 @@ function makeFighters(team, p){
   const act = SYN.filter(s => s.test(cnt));
   const b = { hp:0, atk:0, def:0 };
   act.forEach(s => { for (const k in s.b) b[k] += s.b[k]; });
-  const fin = team.map(m => ({ ...m, base:{ hp:m.hp, atk:m.atk, def:m.def }, bonus:b,
-    hp:m.hp + b.hp, maxhp:m.hp + b.hp, atk:m.atk + b.atk, def:m.def + b.def, dealt:0, kills:0, alive:true, owner:p,
-    energy:0, crit:BASECRIT[m.ab.id] || .0625, critStack:0, st:{ poison:0, burn:0, stun:0, shock:0, confuse:0 }, x:{}, duelHp:0 }));
+  const fin = team.map(m => {
+    const bf = m.buff || { hp:0, atk:0, def:0 };           // buffs comprados en la tienda (liga Pick 3)
+    const h = m.hp + bf.hp, a = m.atk + bf.atk, d = m.def + bf.def;
+    return { ...m, base:{ hp:h, atk:a, def:d }, bonus:b, hp:h + b.hp, maxhp:h + b.hp, atk:a + b.atk, def:d + b.def,
+      dealt:0, kills:0, alive:true, owner:p, energy:0, crit:BASECRIT[m.ab.id] || .0625, critStack:0,
+      st:{ poison:0, burn:0, stun:0, shock:0, confuse:0 }, x:{}, duelHp:0 };
+  });
   return { fin, syn:act };
 }
 function buildTeam(p){ const r = makeFighters(S.teams[p], p); S.syn[p] = r.syn; S.fin[p] = r.fin; }
@@ -996,7 +1018,7 @@ function endGame(w){
     </div>
     <div class="sumtab">
       <div class="sumrow hd"><div></div><div class="v" style="color:${PCOL[0]}">${esc(S.names[0])}</div><div class="v" style="color:${PCOL[1]}">${esc(S.names[1])}</div></div>
-      <div class="sumrow"><div class="k">Monedas gastadas</div><div class="v">${S.spent[0]} 🪙</div><div class="v">${S.spent[1]} 🪙</div></div>
+      ${S.pick ? '' : `<div class="sumrow"><div class="k">Monedas gastadas</div><div class="v">${S.spent[0]} 🪙</div><div class="v">${S.spent[1]} 🪙</div></div>`}
       <div class="sumrow"><div class="k">Daño total</div><div class="v">${S.dmgTotal[0]}</div><div class="v">${S.dmgTotal[1]}</div></div>
       <div class="sumrow"><div class="k">Críticos</div><div class="v">${S.crits[0]}</div><div class="v">${S.crits[1]}</div></div>
       <div class="sumrow"><div class="k">Sinergias</div><div class="v"><small>${synTxt(0)}</small></div><div class="v"><small>${synTxt(1)}</small></div></div>
@@ -1011,7 +1033,7 @@ function shareText(){
   const syn = p => S.syn[p].length ? S.syn[p].map(s => s.name).join(', ') : 'ninguna';
   return `🏆 Draft 20 · Multiverso\n${S.names[w]} vence a ${S.names[l]}\n` +
     `MVP: ${mvp.icono} ${mvp.nombre} (${mvp.dealt} de daño, ${mvp.kills} K.O.)\n` +
-    `Monedas gastadas: ${S.names[0]} ${S.spent[0]} · ${S.names[1]} ${S.spent[1]}\n` +
+    (S.pick ? '' : `Monedas gastadas: ${S.names[0]} ${S.spent[0]} · ${S.names[1]} ${S.spent[1]}\n`) +
     `Daño total: ${S.names[0]} ${S.dmgTotal[0]} · ${S.names[1]} ${S.dmgTotal[1]}\n` +
     `Sinergias: ${S.names[0]} → ${syn(0)} | ${S.names[1]} → ${syn(1)}`;
 }
@@ -1082,7 +1104,7 @@ const ACT = {
       } catch (e2) { toast('No se pudo copiar'); }
     }
   },
-  again(){ SFX.click(); const n = S ? S.names : null; renderSetup(n); show('setup'); }
+  again(){ SFX.click(); const n = S ? S.names : null; if (S && S.pick) renderSetupPick2(n); else renderSetup(n); show('setup'); }
 };
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
@@ -1120,42 +1142,63 @@ function doShare(t){
 }
 
 /* ---------- Selección de modo y registro ---------- */
+let MENU_TAB = 0;
 function renderMode(){
+  const bid = MENU_TAB === 0;
   $('#scr-mode').innerHTML = `
-    <div class="hero">
+    <div class="hero small">
       <div class="bigcoin disp"><span>20</span></div>
       <h1 class="title disp">Draft <em>20</em></h1>
-      <p class="sub">Elige cómo quieres jugar.</p>
     </div>
-    <div class="modes">
-      <button class="btn mode" data-act="mode2"><span class="disp">2 JUGADORES</span><small>(DRAFT CLÁSICO)</small><i>Subasta alterna de 20 monedas y combate final 4v4.</i></button>
-      <button class="btn mode red" data-act="mode4"><span class="disp">4 JUGADORES</span><small>(LIGA &amp; TORNEO)</small><i>Pujas secretas, duelos por fases y torneo final.</i></button>
+    <div class="tabs">
+      <button class="tab ${bid ? 'on' : ''}" data-act="tab" data-t="0">DRAFT DE PUJA<br>(SUBASTA)</button>
+      <button class="tab ${bid ? '' : 'on'}" data-act="tab" data-t="1">DRAFT DE SELECCIÓN<br>(PICK 3)</button>
+    </div>
+    <p class="sub" style="margin:12px 6px 0;text-align:center">${bid ? 'Pujas y monedas: gana quien más arriesga.' : 'Sin subasta en el draft: eliges 1 personaje entre 3 al azar.'}</p>
+    <div class="modes">${bid ? `
+      <button class="btn mode" data-act="mode2"><span class="disp">2 JUGADORES</span><small>(SUBASTA CLÁSICA)</small><i>Puja alternada con 20 monedas y combate final 4v4.</i></button>
+      <button class="btn mode red" data-act="mode4"><span class="disp">4 JUGADORES</span><small>(LIGA &amp; SUBASTA SECRETA)</small><i>Pujas ocultas, redistribución de presupuesto y combates progresivos.</i></button>` : `
+      <button class="btn mode neon" data-act="mode2p"><span class="disp">2 JUGADORES</span><small>(PICK 3)</small><i>Modo directo: elige 1 de 3 y a combatir 4v4.</i></button>
+      <button class="btn mode violet" data-act="mode4p"><span class="disp">4 JUGADORES</span><small>(LIGA PICK 3)</small><i>Liga por fases con tienda de buffs y torneo final.</i></button>`}
     </div>`;
 }
-function renderSetup4(prev){
+function renderSetup4(prev, mode){
+  const pick = mode === 'pick';
   const n = prev || ['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4'];
   $('#scr-setup4').innerHTML = `
-    <div class="head"><h2 class="disp">Liga &amp; torneo</h2>${muteBtn()}</div>
+    <div class="head"><h2 class="disp">${pick ? 'Liga Pick 3' : 'Liga &amp; subasta secreta'}</h2>${muteBtn()}</div>
     <div class="panel" style="margin-top:6px">
       ${[0, 1, 2, 3].map(i => `<label for="t${i}">Jugador ${i + 1}</label><input id="t${i}" style="border-left:4px solid ${PC4[i]}" maxlength="14" value="${esc(n[i])}" autocomplete="off">`).join('')}
     </div>
-    <button class="btn" data-act="start4">Empezar torneo</button>
+    <button class="btn" data-act="${pick ? 'startPick4' : 'start4'}">Empezar torneo</button>
     <button class="btn ghost sm" data-act="toMode" style="margin-top:10px">Cambiar de modo</button>
     <ul class="rules">
+      ${pick ? `
+      <li><b>Drafts Pick 3:</b> en tu turno ves 3 personajes al azar y eliges 1. Cada uno se lleva 1 por draft.</li>
+      <li><b>Combates 1v1 y 2v2:</b> dan monedas que gastas en la tienda de buffs.</li>
+      <li><b>Torneo final:</b> semifinales 4v4 y Gran Final.</li>` : `
       <li><b>Drafts 1 y 2:</b> pujas secretas por 4 personajes; cada uno se lleva exactamente 1. Luego duelos 1v1 y 2v2 con monedas extra.</li>
       <li><b>Drafts 3 y 4:</b> seguidos, sin combates. Al final cada uno tiene 4 luchadores.</li>
-      <li><b>Torneo final:</b> dos semifinales 4v4 y la Gran Final.</li>
+      <li><b>Torneo final:</b> dos semifinales 4v4 y la Gran Final.</li>`}
     </ul>`;
 }
-function newTournament(names){
-  T = { names, coins:[20, 20, 20, 20], spent:[0, 0, 0, 0], teams:[[], [], [], []], deck:shuffle(CHARS), deckPos:0, draft:0,
+function readNames4(){
+  const names = [0, 1, 2, 3].map(i => ($('#t' + i).value.trim() || 'Jugador ' + (i + 1)));
+  const seen = new Set(); names.forEach((n, i) => { let k = n; while (seen.has(k.toLowerCase())) k = n + ' ' + (i + 1); seen.add(k.toLowerCase()); names[i] = k; });
+  return names;
+}
+function newTournament(names, mode){
+  mode = mode || 'bid';
+  T = { names, mode, coins:mode === 'pick' ? [0, 0, 0, 0] : [20, 20, 20, 20], spent:[0, 0, 0, 0], teams:[[], [], [], []], deck:shuffle(CHARS), deckPos:0, draft:0,
         order:[], cards:[], bids:[], bidIdx:0, cur:[], curPid:0, res:[], ri:0, rows:[], rvBusy:false, rvDone:false,
         phase:'', pairs:[], di:0, prevKey:null, log:[], perf:{}, fx:[], lp:0, passNext:null, dfx:[], duelPids:[0, 1],
+        picks:[], shopI:0, shopPid:0, shopNext:null, shopActive:false,
         stats:[0, 1, 2, 3].map(() => ({ dmg:0, crits:0, kills:0, wins:0 })) };
 }
 
 /* ---------- Drafts de pujas secretas ---------- */
 function startDraft(){
+  if (T.mode === 'pick') return startPickDraft();
   T.draft++;
   T.cards = T.deck.slice(T.deckPos, T.deckPos + 4); T.deckPos += 4;
   T.order = shuffle([0, 1, 2, 3]); T.bids = [[], [], [], []]; T.bidIdx = 0;
@@ -1328,7 +1371,7 @@ function duelEnd(a, b, w){
 function afterDuel(){
   T.di++;
   if (T.di < T.pairs.length) return duelLineups();
-  if (T.phase === 1 || T.phase === 2) return startDraft();
+  if (T.phase === 1 || T.phase === 2) return T.mode === 'pick' ? startShop(() => startDraft()) : startDraft();
   if (T.phase === 'semi') {
     const sm = T.log.filter(l => l.phase === 'semi');
     T.phase = 'final'; T.pairs = [[sm[0].win, sm[1].win]]; T.di = 0; return showPairings();
@@ -1434,6 +1477,153 @@ function renderChampion(){
   SFX.win(); vib([80, 50, 80, 50, 160]); confetti();
 }
 
+/* ============================== MODO PICK 3 (SELECCIÓN) ============================== */
+const TAG2SYN = { Avengers:'avengers', Tech:'tech', Asgard:'cosmic', Cosmic:'cosmic', Multiverse:'multi', Villains:'villains', Guardians:'guardians', Street:'street', Wakanda:'wakanda' };
+let PK = { cards:[], sel:-1, cb:null };
+// 3 personajes al azar entre los que nadie tiene todavía (los descartados vuelven al mazo común)
+const drawThree = owned => shuffle(CHARS.filter(c => !owned.has(c.id))).slice(0, 3);
+function synHint(c, team){
+  const sy = SYN.find(x => x.id === TAG2SYN[c.tag]); if (!sy) return '';
+  const n = team.filter(m => TAG2SYN[m.tag] === sy.id).length, hot = n + 1 >= 2;
+  const grp = sy.id === 'cosmic' ? 'Asgard/Cosmic' : c.tag;
+  return `<div class="synline ${hot ? 'hot' : ''}">${sy.ico} <b>${sy.name}</b> · ${bonusTxt(sy.b)} a todos con 2+ ${grp}<br>${n ? `Llevas ${n} de este grupo.` : 'Aún no llevas ninguno de este grupo.'}${hot ? ' <b>¡Con este activas la sinergia!</b>' : ''}</div>`;
+}
+function pickCard(c, i, team){
+  return `<div class="bcard pk" id="pk${i}" data-act="pkSel" data-i="${i}" style="--c:${tc(c.tag)};--ca:${tc(c.tag)}55">
+    <div class="bt"><div class="ring xs"><span>${c.icono}</span></div>
+      <div><b class="disp">${esc(c.nombre)}</b><div class="chips"><span class="chip ${c.rol === 'Hero' ? 'hero' : 'villain'}">${c.rol === 'Hero' ? 'Héroe' : 'Villano'}</span><span class="chip" style="color:${tc(c.tag)}">${c.tag}</span></div></div></div>
+    <div class="bstats"><span>HP ???</span><span>ATK ???</span><span>DEF ???</span></div>
+    <div class="abox"><span class="abtype">${KINDLBL[c.ab.k]}</span><b class="disp">${esc(c.ab.n)}</b><p>${esc(c.ab.d)}</p></div>
+    ${synHint(c, team)}
+  </div>`;
+}
+function renderPick(o){
+  PK = { cards:o.cards, sel:-1, cb:o.cb };
+  tshow(`<div class="head"><h2 class="disp" style="color:${o.color}">${esc(o.title)}</h2>${muteBtn()}</div>
+    <p class="note2">${o.note}</p>
+    ${o.cards.map((c, i) => pickCard(c, i, o.team)).join('')}
+    <div class="bidbar"><button class="btn" id="pkBtn" data-act="pkOk" disabled>Elige un personaje</button></div>`);
+}
+const teamIcons = t => t.length ? t.map(c => c.icono).join(' ') : 'vacío';
+
+/* ---- Pick 3 · 2 jugadores ---- */
+function renderSetupPick2(prev){
+  const n = prev || ['Jugador 1', 'Jugador 2'];
+  $('#scr-setup').innerHTML = `
+    <div class="hero">
+      <div class="bigcoin disp"><span>3</span></div>
+      <h1 class="title disp">Pick <em>3</em></h1>
+      <p class="sub">En tu turno ves 3 personajes al azar con las stats ocultas. Eliges 1 y se lo quitas a tu rival.</p>
+    </div>
+    <div class="panel">
+      <label for="n0">Jugador 1</label>
+      <input id="n0" maxlength="14" value="${esc(n[0])}" autocomplete="off">
+      <label for="n1">Jugador 2</label>
+      <input id="n1" maxlength="14" value="${esc(n[1])}" autocomplete="off">
+    </div>
+    <button class="btn" data-act="startPick2">Empezar draft</button>
+    <button class="btn ghost sm" data-act="toMode" style="margin-top:10px">Cambiar de modo</button>
+    <ul class="rules">
+      <li><b>Elección:</b> los 2 descartados vuelven al mazo; el elegido queda bloqueado.</li>
+      <li><b>Turnos:</b> el que empieza la ronda alterna (1-2, 2-1, 2-1, 1-2) para compensar.</li>
+      <li><b>Combate:</b> sinergias, alineación secreta y 4v4 como siempre.</li>
+    </ul>`;
+}
+// Orden en serpiente: 1-2, 2-1, 2-1, 1-2 (ningún jugador elige siempre primero)
+function pickPlayer2(){ const r = S.pkIdx >> 1, k = S.pkIdx & 1; return r % 2 === 0 ? k : 1 - k; }
+function nextPick2(){
+  if (S.pkIdx >= 8) return goSynergy();
+  const p = pickPlayer2(), r = (S.pkIdx >> 1) + 1;
+  showPass(p, () => {
+    const owned = new Set([...S.teams[0], ...S.teams[1]].map(c => c.id));
+    renderPick({ title:`Elige, ${S.names[p]}`, color:PCOL[p], cards:drawThree(owned), team:S.teams[p],
+      note:`Ronda ${r} de 4. Tu equipo: ${teamIcons(S.teams[p])}. Elige 1 de estos 3: se retira del mazo y no le saldrá a tu rival.`,
+      cb:c => { S.teams[p].push(c); S.pkIdx++; nextPick2(); } });
+  }, `Ronda ${r} de 4 · elección ${(S.pkIdx & 1) + 1} de 2. Pasa el móvil a`);
+}
+
+/* ---- Pick 3 · liga de 4 jugadores ---- */
+function startPickDraft(){
+  T.draft++; T.order = shuffle([0, 1, 2, 3]); T.bidIdx = 0; T.picks = [];
+  const showCoins = T.coins.some(c => c > 0);
+  tshow(`
+    <div class="head"><h2 class="disp">Draft ${T.draft} de 4 · Pick 3</h2>${muteBtn()}</div>
+    <p class="note2">En tu turno verás <b>3 personajes al azar</b> (stats ocultas, con habilidad y sinergias) y elegirás <b>1</b>. Lo elegido se retira del mazo y los descartados pueden volver a salir. Cada jugador se lleva exactamente 1 por draft.</p>
+    ${showCoins ? `<div class="sumtab">${[0, 1, 2, 3].map(i => `<div class="sumrow" style="grid-template-columns:1fr auto"><div>${tn(i)}</div><div class="v">${T.coins[i]} 🪙 para la tienda</div></div>`).join('')}</div>` : ''}
+    <p class="note2">Orden de turno (aleatorio): ${T.order.map((p, i) => `${i + 1}. ${tn(p)}`).join(' · ')}</p>
+    <div class="actions"><button class="btn" data-act="tStartBids">Empezar elecciones</button></div>`);
+}
+function nextPicker(){
+  if (T.bidIdx >= 4) return finishPickDraft();
+  const pid = T.order[T.bidIdx];
+  passScreen(T.names[pid], PC4[pid], `Elección ${T.bidIdx + 1} de 4 (Draft ${T.draft}). Pasa el móvil a`, () => {
+    const owned = new Set(T.teams.flat().map(c => c.id));
+    renderPick({ title:`Elige, ${T.names[pid]}`, color:PC4[pid], cards:drawThree(owned), team:T.teams[pid],
+      note:`Draft ${T.draft} · elección ${T.bidIdx + 1} de 4. Tu equipo: ${teamIcons(T.teams[pid])}. Elige 1 de estos 3.`,
+      cb:c => { T.teams[pid].push({ ...c, buff:{ hp:0, atk:0, def:0 } }); T.picks[pid] = c; T.bidIdx++; nextPicker(); } });
+  }, `Soy ${T.names[pid]}`);
+}
+function finishPickDraft(){
+  const rows = [0, 1, 2, 3].map(pid => {
+    const c = T.picks[pid];
+    return `<div class="lrow" style="--c:${tc(c.tag)}"><div class="ring xs" style="--ca:${tc(c.tag)}55"><span>${c.icono}</span></div>
+      <div class="lmeta"><b class="disp">${esc(c.nombre)}</b><span style="color:${PC4[pid]}">${esc(T.names[pid])}</span>
+      <span style="display:block">Equipo: ${T.teams[pid].length} de 4</span></div></div>`;
+  }).join('');
+  const lbl = ['', 'Ir a los duelos 1v1', 'Ir a los duelos 2v2', 'Siguiente: Draft 4', 'Tienda y torneo final'][T.draft];
+  tshow(`<div class="head"><h2 class="disp">Draft ${T.draft} completado</h2>${muteBtn()}</div>${rows}
+    <div class="actions"><button class="btn" data-act="tAfterDraft">${lbl}</button></div>`);
+}
+
+/* ---- Tienda de buffs (liga Pick 3): se abre tras la Fase 1, tras la Fase 2 y antes del torneo final ---- */
+const BUFFS = { hp:{ amt:15, cost:5, lbl:'HP' }, atk:{ amt:4, cost:8, lbl:'ATK' }, def:{ amt:3, cost:6, lbl:'DEF' } };
+const BUFF_MIN = 5;
+function startShop(next){ T.shopNext = next; T.shopI = 0; T.shopActive = true; shopTurn(); }
+function shopTurn(){
+  while (T.shopI < 4 && T.coins[T.shopI] < BUFF_MIN) T.shopI++;
+  if (T.shopI >= 4) { T.shopActive = false; return T.shopNext(); }
+  const pid = T.shopI; T.shopPid = pid;
+  passScreen(T.names[pid], PC4[pid], 'Tienda de buffs: gasta tus monedas en mejorar luchadores. Pasa el móvil a', () => renderShop(pid, true), `Soy ${T.names[pid]}`);
+}
+function renderShop(pid, anim){
+  const html = `<div class="head"><h2 class="disp" style="color:${PC4[pid]}">Tienda · ${esc(T.names[pid])}</h2>${muteBtn()}</div>
+    <p class="note2">Tienes <b>${T.coins[pid]} 🪙</b>. Los buffs son permanentes para ese luchador. Lo que no gastes, lo conservas.</p>
+    ${T.teams[pid].map((m, i) => {
+      const bf = m.buff || { hp:0, atk:0, def:0 };
+      return `<div class="bcard" style="--c:${tc(m.tag)};--ca:${tc(m.tag)}55">
+        <div class="bt"><div class="ring xs"><span>${m.icono}</span></div>
+          <div><b class="disp">${esc(m.nombre)}</b><div class="note" style="font-size:13px;color:var(--mute)">HP ${m.hp + bf.hp} · ATK ${m.atk + bf.atk} · DEF ${m.def + bf.def}</div></div></div>
+        <div class="shopgrid">${Object.keys(BUFFS).map(k => `<button class="buy" data-act="buy" data-i="${i}" data-k="${k}" ${T.coins[pid] < BUFFS[k].cost ? 'disabled' : ''}>+${BUFFS[k].amt} ${BUFFS[k].lbl}<small>${BUFFS[k].cost} 🪙</small></button>`).join('')}</div>
+      </div>`;
+    }).join('')}
+    <div class="actions"><button class="btn" data-act="shopDone">Terminar compras</button></div>`;
+  if (anim) tshow(html); else $('#scr-t').innerHTML = html;
+}
+
+Object.assign(ACT, {
+  tab(b){ MENU_TAB = +b.dataset.t; SFX.click(); renderMode(); },
+  mode2p(){ SFX.click(); renderSetupPick2(); show('setup'); },
+  mode4p(){ SFX.click(); renderSetup4(null, 'pick'); show('setup4'); },
+  startPick2(){
+    let a = $('#n0').value.trim() || 'Jugador 1', b = $('#n1').value.trim() || 'Jugador 2';
+    if (a.toLowerCase() === b.toLowerCase()) b += ' 2';
+    resetColors(); SFX.bid(); newGame([a, b]); S.pick = true; S.pkIdx = 0; nextPick2();
+  },
+  startPick4(){ const names = readNames4(); SFX.bid(); newTournament(names, 'pick'); startDraft(); },
+  pkSel(b){
+    const i = +b.dataset.i; PK.sel = i; SFX.click();
+    PK.cards.forEach((c, j) => { const e = $('#pk' + j); if (e) e.classList.toggle('sel', j === i); });
+    const bt = $('#pkBtn'); bt.disabled = false; bt.textContent = 'Elegir a ' + PK.cards[i].nombre;
+  },
+  pkOk(){ if (PK.sel < 0) return; const c = PK.cards[PK.sel]; PK.sel = -1; SFX.coin(); PK.cb(c); },
+  buy(b){
+    const pid = T.shopPid, m = T.teams[pid][+b.dataset.i], k = b.dataset.k, bf = BUFFS[k];
+    if (!m || !bf || T.coins[pid] < bf.cost) return;
+    T.coins[pid] -= bf.cost; T.spent[pid] += bf.cost; m.buff[k] += bf.amt; SFX.coin(); vib(15); renderShop(pid, false);
+  },
+  shopDone(){ SFX.click(); T.shopI++; shopTurn(); }
+});
+
 Object.assign(ACT, {
   mode2(){ SFX.click(); renderSetup(); show('setup'); },
   mode4(){ SFX.click(); renderSetup4(); show('setup4'); },
@@ -1441,11 +1631,11 @@ Object.assign(ACT, {
   start4(){
     const names = [0, 1, 2, 3].map(i => ($('#t' + i).value.trim() || 'Jugador ' + (i + 1)));
     const seen = new Set(); names.forEach((n, i) => { let k = n; while (seen.has(k.toLowerCase())) k = n + ' ' + (i + 1); seen.add(k.toLowerCase()); names[i] = k; });
-    SFX.bid(); newTournament(names); startDraft();
+    SFX.bid(); newTournament(names, 'bid'); startDraft();
   },
-  tAgain(){ SFX.click(); renderSetup4(T ? T.names : null); show('setup4'); },
+  tAgain(){ SFX.click(); renderSetup4(T ? T.names : null, T ? T.mode : 'bid'); show('setup4'); },
   tPassOk(){ SFX.click(); if (T && T.passNext) T.passNext(); },
-  tStartBids(){ SFX.click(); nextBidder(); },
+  tStartBids(){ SFX.click(); if (T.mode === 'pick') nextPicker(); else nextBidder(); },
   bidPlus(b){ const i = +b.dataset.i, pid = T.curPid; if (T.cur[i] + 1 > bidMax(pid)) return; T.cur[i]++; SFX.click(); paintBid(pid); },
   bidMinus(b){ const i = +b.dataset.i; if (T.cur[i] <= 1) return; T.cur[i]--; SFX.click(); paintBid(T.curPid); },
   bidOk(){ T.bids[T.curPid] = T.cur.slice(); T.bidIdx++; SFX.bid(); nextBidder(); },
@@ -1454,7 +1644,7 @@ Object.assign(ACT, {
   tAfterDraft(){
     SFX.click();
     if (T.draft === 1) startPhase(1); else if (T.draft === 2) startPhase(2);
-    else if (T.draft === 3) startDraft(); else startFinal();
+    else if (T.draft === 3) startDraft(); else if (T.mode === 'pick') startShop(() => startFinal()); else startFinal();
   },
   tNextDuel(){ SFX.click(); duelLineups(); },
   tFight(){ SFX.click(); startBattle(); },
